@@ -17,7 +17,7 @@ async def get_repository_info(repository, api_url):
       except:
         is_valid_repository = False
 
-      if VALID_DATE > created_at or not is_valid_repository:
+      if VALID_DATE > created_at or not is_valid_repository or response['fork']:
         async with aiofiles.open('invalid_github_repositories.csv', 'a') as f:
           await f.write(repository)
 
@@ -25,11 +25,10 @@ async def get_repository_info(repository, api_url):
 
 
 repositories = open('github_urls.csv','r').readlines()
-tasks = []
+tasks = set()
 
 for repository in repositories:
   repository_api_url = repository.replace('https://github.com/', 'https://api.github.com/repos/')
-
-  tasks.append(get_repository_info(repository, repository_api_url))
+  tasks.add(get_repository_info(repository, repository_api_url))
 
 asyncio.run(asyncio.wait(tasks))
